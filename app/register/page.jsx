@@ -6,23 +6,18 @@ import Link from 'next/link';
 
 export default function RegisterPage() {
   const router = useRouter();
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     role: 'Employee',
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -32,16 +27,28 @@ export default function RegisterPage() {
     setSuccess('');
 
     try {
-      localStorage.setItem('user_name', formData.name);
-      localStorage.setItem('user_email', formData.email);
-      localStorage.setItem('user_role', formData.role);
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-      setSuccess('Registration successful! Redirecting to login...');
-      setTimeout(() => {
-        router.push('/login');
-      }, 1000);
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('user_name', formData.name);
+        localStorage.setItem('user_email', formData.email);
+        localStorage.setItem('user_role', formData.role);
+
+        setSuccess('Registration successful! Redirecting to login...');
+        setTimeout(() => {
+          router.push('/login');
+        }, 1500);
+      } else {
+        setError(data.message || 'Registration failed.');
+      }
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError('An unexpected error occurred.');
     } finally {
       setLoading(false);
     }
