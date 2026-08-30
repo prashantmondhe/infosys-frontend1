@@ -10,7 +10,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // युझर लॉगिन आहे की नाही ते तपासणे
+    
     const role = localStorage.getItem('user_role');
     const name = localStorage.getItem('user_name');
 

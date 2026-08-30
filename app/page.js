@@ -9,14 +9,17 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Employee');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      // Connect directly to FastAPI Python Backend
-      const res = await fetch('http://localhost:8000/api/auth/register', {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://infosys-backend-production.up.railway.app';
+      
+      const res = await fetch(`${backendUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, role }),
@@ -32,7 +35,9 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Unable to connect to the backend server. Make sure FastAPI (Port 8000) is running.');
+      alert('Unable to connect to the backend server. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,9 +98,10 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 p-3 text-white font-medium hover:bg-blue-700 transition"
+            disabled={loading}
+            className="w-full rounded-lg bg-blue-600 p-3 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50"
           >
-            Create Account
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
