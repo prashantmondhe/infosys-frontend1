@@ -1,52 +1,38 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  const router = useRouter();
   const [userName, setUserName] = useState('Employee');
   const [userRole, setUserRole] = useState('HR Operations Lead');
-  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hello! How can I assist you with enterprise policies or workflows today?'
+      content: 'Hello! I am your Enterprise Policy Assistant. How can I assist you today?'
     }
   ]);
 
   const messagesEndRef = useRef(null);
-
-  // तुमची अचूक Railway URL (शेवटी स्लॅश नको)
   const BACKEND_URL = 'https://infosys-backend-production.up.railway.app';
 
   useEffect(() => {
     const role = localStorage.getItem('user_role');
     const name = localStorage.getItem('user_name');
-
     if (name) setUserName(name);
     if (role) setUserRole(role);
-    setLoading(false);
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    router.push('/login');
-  };
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!query.trim() || isSending) return;
 
     const userPrompt = query.trim();
-    const currentRole = userRole || 'HR Operations Lead';
-
     setQuery('');
     setMessages((prev) => [...prev, { role: 'user', content: userPrompt }]);
     setIsSending(true);
@@ -54,123 +40,51 @@ export default function DashboardPage() {
     try {
       const response = await fetch(`${BACKEND_URL}/api/query`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          query: userPrompt,
-          designation: currentRole
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: userPrompt, designation: userRole })
       });
 
-      const responseText = await response.text();
-      let data = {};
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Failed to fetch answer');
 
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseErr) {
-        throw new Error(responseText || `HTTP error ${response.status}`);
-      }
-
-      if (!response.ok) {
-        throw new Error(data.detail || `Server returned status ${response.status}`);
-      }
-
-      const botReply =
-        data.answer ||
-        data.response ||
-        data.result ||
-        'Received response, but no direct answer field was provided.';
-
-      setMessages((prev) => [...prev, { role: 'assistant', content: botReply }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.answer || 'No answer returned.' }]);
     } catch (err) {
-      console.error('API Error:', err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: `Connection Error: ${err.message || 'Unable to communicate with the backend.'}`
-        }
-      ]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: `⚠️ Error: ${err.message}` }]);
     } finally {
       setIsSending(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-900 text-white font-semibold">
-        Loading Enterprise Portal...
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
-      <header className="flex justify-between items-center bg-slate-900 px-6 py-3 shadow-md border-b border-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span className="font-bold text-lg text-white">Enterprise GPT Portal</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden sm:block">
-            <p className="text-xs text-slate-400">Designation</p>
-            <p className="text-sm font-medium text-slate-200">
-              {userName} <span className="text-xs text-blue-400">({userRole})</span>
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-lg font-semibold transition"
-          >
-            Logout
-          </button>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#020617', color: '#f8fafc', fontFamily: 'sans-serif' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
+        <strong>Enterprise GPT Portal</strong>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '0.875rem', color: '#94a3b8' }}>{userName} ({userRole})</span>
+          <button onClick={() => { localStorage.clear(); window.location.href = '/login'; }} style={{ padding: '6px 12px', backgroundColor: '#ef4444', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer' }}>Logout</button>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 max-w-4xl w-full mx-auto">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-none'
-                  : 'bg-slate-800 border border-slate-700 text-slate-100 rounded-bl-none whitespace-pre-wrap'
-              }`}
-            >
-              {msg.content}
-            </div>
+      <main style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', maxWidth: '800px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem', boxSizing: 'border-box' }}>
+        {messages.map((msg, i) => (
+          <div key={i} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%', padding: '12px 16px', borderRadius: '12px', backgroundColor: msg.role === 'user' ? '#2563eb' : '#1e293b', border: msg.role === 'user' ? 'none' : '1px solid #334155', whiteSpace: 'pre-wrap' }}>
+            {msg.content}
           </div>
         ))}
-        {isSending && (
-          <div className="flex justify-start">
-            <div className="bg-slate-800 border border-slate-700 text-slate-400 text-sm px-5 py-3 rounded-2xl rounded-bl-none animate-pulse">
-              Processing request...
-            </div>
-          </div>
-        )}
+        {isSending && <div style={{ color: '#94a3b8', fontStyle: 'italic' }}>Analyzing enterprise documents...</div>}
         <div ref={messagesEndRef} />
       </main>
 
-      <footer className="bg-slate-900 border-t border-slate-800 p-4">
-        <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-3">
+      <footer style={{ padding: '1rem', backgroundColor: '#0f172a', borderTop: '1px solid #1e293b' }}>
+        <form onSubmit={handleSendMessage} style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', gap: '0.5rem' }}>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Ask a question as ${userRole}...`}
-            className="flex-1 bg-slate-950 border border-slate-700 text-slate-100 px-4 py-2.5 rounded-xl focus:outline-none focus:border-blue-500 text-sm"
+            placeholder="Ask about policies, leave rules..."
+            style={{ flex: 1, padding: '12px', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '8px', color: 'white', outline: 'none' }}
           />
-          <button
-            type="submit"
-            disabled={isSending || !query.trim()}
-            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:cursor-not-allowed"
-          >
+          <button type="submit" disabled={isSending || !query.trim()} style={{ padding: '12px 20px', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
             Send
           </button>
         </form>

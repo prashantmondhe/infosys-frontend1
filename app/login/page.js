@@ -1,133 +1,99 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Employee');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [isRegister, setIsRegister] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'HR Operations Lead'
+  });
 
-  const handleLogin = async (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleAuth = (e) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://infosys-backend-production.up.railway.app';
-
-      const res = await fetch(`${backendUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert(`Welcome, ${data.name || 'User'}! Logged in as ${data.role || role}.`);
-        localStorage.setItem('user_name', data.name || '');
-        localStorage.setItem('user_email', data.email || email);
-        localStorage.setItem('user_role', data.role || role);
-
-        if ((data.role || role).toLowerCase() === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/dashboard');
-        }
-      } else {
-        alert(data.detail || data.message || 'Login failed. Please verify credentials.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Unable to connect to backend server. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    const displayName = isRegister ? formData.name : (formData.name || formData.email.split('@')[0]);
+    localStorage.setItem('user_name', displayName || 'Employee');
+    localStorage.setItem('user_email', formData.email);
+    localStorage.setItem('user_role', formData.role);
+    window.location.href = '/dashboard';
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl border border-slate-100">
-        <h2 className="text-3xl font-extrabold text-slate-900 text-center">Welcome Back!</h2>
-        <p className="mt-1 text-sm text-slate-500 text-center">Login to your account to continue</p>
+    <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#020617', color: 'white', fontFamily: 'sans-serif', padding: '1rem' }}>
+      <div style={{ width: '100%', maxWidth: '380px', backgroundColor: '#0f172a', padding: '2rem', borderRadius: '16px', border: '1px solid #1e293b' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', backgroundColor: '#020617', padding: '4px', borderRadius: '8px' }}>
+          <button
+            type="button"
+            onClick={() => setIsRegister(false)}
+            style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: !isRegister ? '#2563eb' : 'transparent', color: 'white', fontWeight: 'bold' }}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsRegister(true)}
+            style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: isRegister ? '#2563eb' : 'transparent', color: 'white', fontWeight: 'bold' }}
+          >
+            Register
+          </button>
+        </div>
 
-        <form onSubmit={handleLogin} autoComplete="off" className="mt-8 space-y-5">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Email
-            </label>
+        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '1.25rem' }}>
+          {isRegister ? 'Create Account' : 'Welcome Back'}
+        </h2>
+
+        <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {isRegister && (
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              name="name"
               required
-              placeholder="Enter your email"
-              className="w-full rounded-xl border border-slate-200 py-3 px-4 text-sm focus:border-blue-600 focus:outline-none"
+              placeholder="Full Name"
+              onChange={handleChange}
+              style={{ padding: '10px 14px', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '8px', color: 'white', outline: 'none' }}
             />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Password
-            </label>
-            <div className="relative flex items-center">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Enter your password"
-                className="w-full rounded-xl border border-slate-200 py-3 pl-4 pr-11 text-sm focus:border-blue-600 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 text-xs text-slate-400 hover:text-slate-600"
-              >
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Login As
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm focus:border-blue-600 focus:outline-none text-slate-800"
-            >
-              <option value="Employee">Login as Employee</option>
-              <option value="Admin">Login as Admin</option>
-            </select>
-          </div>
+          )}
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="Email Address"
+            onChange={handleChange}
+            style={{ padding: '10px 14px', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '8px', color: 'white', outline: 'none' }}
+          />
+          <input
+            type="password"
+            name="password"
+            required
+            placeholder="Password"
+            onChange={handleChange}
+            style={{ padding: '10px 14px', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '8px', color: 'white', outline: 'none' }}
+          />
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            style={{ padding: '10px 14px', backgroundColor: '#020617', border: '1px solid #334155', borderRadius: '8px', color: 'white', outline: 'none' }}
+          >
+            <option value="HR Operations Lead">HR Operations Lead</option>
+            <option value="Employee">Employee</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
+          </select>
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-blue-700 transition disabled:opacity-50"
+            style={{ padding: '12px', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 'bold', cursor: 'pointer', marginTop: '0.5rem' }}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {isRegister ? 'Register & Enter' : 'Sign In'}
           </button>
         </form>
-
-        <div className="mt-4 text-center">
-          <Link href="/forgot-password" className="text-sm font-medium text-blue-600 hover:underline">
-            Forgot Password?
-          </Link>
-        </div>
-
-        <p className="mt-4 text-center text-sm text-slate-600">
-          Don't have an account?{' '}
-          <Link href="/" className="font-semibold text-blue-600 hover:underline">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );
