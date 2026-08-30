@@ -8,7 +8,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#020617', color: 'white', fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#020617', color: 'white' }}>
       <p>Redirecting to Enterprise Portal...</p>
     </div>
   );

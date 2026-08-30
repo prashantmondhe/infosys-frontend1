@@ -56,7 +56,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#020617', color: '#f8fafc', fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#020617', color: '#f8fafc' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
         <strong>Enterprise GPT Portal</strong>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
