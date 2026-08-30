@@ -15,7 +15,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:8000/api/auth/login', {
+      const res = await fetch('http://127.0.0.1:8000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, role }),
@@ -24,7 +24,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        alert(`Welcome, ${data.name || 'User'}! Logged in as ${data.role}.`);
+        alert(`Welcome, ${data.name || 'User'}! Logged in as ${data.role || role}.`);
         localStorage.setItem('user_name', data.name || '');
         localStorage.setItem('user_email', data.email || email);
         localStorage.setItem('user_role', data.role || role);

@@ -6,14 +6,20 @@ import { useRouter } from 'next/navigation';
 export default function DashboardPage() {
   const router = useRouter();
   const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // युझर लॉगिन आहे की नाही ते तपासणे
     const role = localStorage.getItem('user_role');
     const name = localStorage.getItem('user_name');
+
     if (!role) {
       router.push('/login');
     } else {
-      setUserName(name || 'Rohit');
+      setUserName(name || 'Employee');
+      setUserRole(role || 'HR Operations Lead');
+      setLoading(false);
     }
   }, [router]);
 
@@ -22,33 +28,51 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-900 text-white font-semibold">
+        Loading Enterprise Portal...
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-white">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100">
       {/* Top Navbar */}
-      <div className="flex justify-between items-center bg-slate-900 text-white px-6 py-3 shadow-md z-10">
+      <header className="flex justify-between items-center bg-slate-900 text-white px-6 py-3 shadow-lg z-20 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="h-3 w-3 rounded-full bg-green-400 animate-pulse"></div>
-          <span className="font-bold text-lg tracking-wide">Enterprise RAG Portal</span>
+          <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span className="font-bold text-lg tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+            Enterprise GPT Portal
+          </span>
         </div>
+
         <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-300">Logged in: <strong>{userName}</strong></span>
+          <div className="text-right hidden sm:block">
+            <p className="text-xs text-slate-400">Authenticated User</p>
+            <p className="text-sm font-medium text-slate-200">
+              {userName} <span className="text-xs text-blue-400">({userRole})</span>
+            </p>
+          </div>
+
           <button
             onClick={handleLogout}
-            className="bg-red-500 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold hover:bg-red-600 transition"
+            className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-xl font-semibold shadow-sm transition-all duration-150"
           >
             Logout
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Embedded Streamlit Enterprise GPT UI */}
-      <div className="flex-1 w-full h-full bg-slate-50">
+     
+      <main className="flex-1 w-full h-[calc(100vh-60px)] bg-slate-50 relative">
         <iframe
-          src="http://localhost:8501/?embed=true"
-          className="w-full h-full border-none"
+          src="http://127.0.0.1:8501/?embed=true&embed_options=disable_scrolling"
+          className="w-full h-full border-0"
           title="Enterprise GPT Dashboard"
+          allow="clipboard-write; clipboard-read"
         />
-      </div>
+      </main>
     </div>
   );
 }
