@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 export default function RegisterPage() {
   const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,38 +21,22 @@ export default function RegisterPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setSuccess('');
 
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    // १. कोणताही नेटवर्क कॉल न करता थेट लोकल स्टोरेजमध्ये डेटा सेव्ह करणे
+    localStorage.setItem('user_name', formData.name);
+    localStorage.setItem('user_email', formData.email);
+    localStorage.setItem('user_role', formData.role);
 
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem('user_name', formData.name);
-        localStorage.setItem('user_email', formData.email);
-        localStorage.setItem('user_role', formData.role);
-
-        setSuccess('Registration successful! Redirecting to login...');
-        setTimeout(() => {
-          router.push('/login');
-        }, 1500);
-      } else {
-        setError(data.message || 'Registration failed.');
-      }
-    } catch (err) {
-      setError('An unexpected error occurred.');
-    } finally {
-      setLoading(false);
-    }
+    setSuccess('Registration successful! Redirecting to login...');
+    
+    // २. थेट लॉगिन पेजवर पाठवणे
+    setTimeout(() => {
+      router.push('/login');
+    }, 1000);
   };
 
   return (
