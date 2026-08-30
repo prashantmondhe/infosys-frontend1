@@ -10,7 +10,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    
     const role = localStorage.getItem('user_role');
     const name = localStorage.getItem('user_name');
 
@@ -35,6 +34,9 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  // Streamlit पब्लिक URL (किंवा लोकल टेस्टिंगसाठी fallback)
+  const STREAMLIT_URL = process.env.NEXT_PUBLIC_STREAMLIT_URL || "https://infosys-backend-production.up.railway.app";
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100">
@@ -64,10 +66,10 @@ export default function DashboardPage() {
         </div>
       </header>
 
-     
+      {/* Main Content Area */}
       <main className="flex-1 w-full h-[calc(100vh-60px)] bg-slate-50 relative">
         <iframe
-          src="http://127.0.0.1:8501/?embed=true&embed_options=disable_scrolling"
+          src={`${STREAMLIT_URL}/?embed=true&embed_options=disable_scrolling`}
           className="w-full h-full border-0"
           title="Enterprise GPT Dashboard"
           allow="clipboard-write; clipboard-read"

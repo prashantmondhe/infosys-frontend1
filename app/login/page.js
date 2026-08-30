@@ -9,13 +9,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Employee');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/auth/login', {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://infosys-backend-production.up.railway.app';
+
+      const res = await fetch(`${backendUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, role }),
@@ -39,7 +43,9 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Cannot connect to FastAPI backend (Port 8000). Please make sure backend is running.');
+      alert('Unable to connect to backend server. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,16 +102,17 @@ export default function LoginPage() {
               onChange={(e) => setRole(e.target.value)}
               className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm focus:border-blue-600 focus:outline-none text-slate-800"
             >
-              <option value="Admin">Login as Admin</option>
               <option value="Employee">Login as Employee</option>
+              <option value="Admin">Login as Admin</option>
             </select>
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-blue-700 transition"
+            disabled={loading}
+            className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
