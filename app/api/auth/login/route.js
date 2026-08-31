@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { email, password, role } = body;
+    const { email, password, role } = await request.json();
 
-    // युझर प्रमाणीकरण लॉजिक (उदा. डेटाबेस तपासणी)
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },
@@ -13,18 +11,18 @@ export async function POST(request) {
       );
     }
 
-    // यशस्वी रिस्पॉन्स
+    // यशस्वी लॉगिन रिस्पॉन्स
     return NextResponse.json(
-      { 
-        message: "Login successful", 
+      {
+        message: "Login successful",
         user: { email, role },
-        token: "dummy_jwt_token_here" 
-      }, 
+        token: "dummy_token_12345",
+      },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { message: "Internal server error" }, 
+      { message: "Internal server error" },
       { status: 500 }
     );
   }
