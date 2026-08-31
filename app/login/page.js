@@ -1,4 +1,5 @@
-﻿"use client";
+﻿
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,43 +19,58 @@ export default function AuthPage() {
     setLoading(true);
     setMessage({ type: "", text: "" });
 
-    try {
-      if (view === "login") {
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, role }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Login failed");
+    // Endpoint आणि Payload ठरवणे
+    const endpoint = view === "login" 
+      ? "/api/auth/login" 
+      : view === "register" 
+      ? "/api/auth/register" 
+      : "/api/auth/forgot-password";
 
+    const payload = view === "login"
+      ? { email, password, role }
+      : view === "register"
+      ? { name, email, password, role }
+      : { email };
+
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      // १. रिस्पॉन्स प्रकार तपासणे (JSON vs HTML Error)
+      const contentType = res.headers.get("content-type");
+      let data;
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const errorHtml = await res.text();
+        throw new Error(`Server returned HTML (Status ${res.status}). Route does not exist or server error.`);
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.message || `Request failed with status ${res.status}`);
+      }
+
+      // २. यशस्वी झाल्यास (Success Handling)
+      if (view === "login") {
         localStorage.setItem("userRole", role);
         localStorage.setItem("userEmail", email);
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
         router.push("/dashboard");
       } else if (view === "register") {
-        const res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password, role }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Registration failed");
-
         setMessage({ type: "success", text: "Registration successful! Please Sign In." });
         setView("login");
       } else if (view === "forgot") {
-        const res = await fetch("/api/auth/forgot-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Reset link sent");
-
         setMessage({ type: "success", text: "Password reset link sent to your email." });
       }
     } catch (err) {
-      setMessage({ type: "error", text: err.message || "An error occurred" });
+      console.error("API Error:", err);
+      setMessage({ type: "error", text: err.message || "An unexpected error occurred" });
     } finally {
       setLoading(false);
     }
@@ -138,7 +154,7 @@ export default function AuthPage() {
           {view === "forgot" && "Enter your email to receive a reset link"}
         </p>
 
-        {/* Message Alert */}
+        {/* Message Box */}
         {message.text && (
           <div style={{
             marginBottom: "16px",
@@ -216,7 +232,7 @@ export default function AuthPage() {
             />
           )}
 
-          {/* Role Dropdown: Only Admin & Employee */}
+          {/* Role Dropdown (Only Employee & Admin) */}
           {view !== "forgot" && (
             <select
               value={role}
@@ -252,7 +268,7 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Back to Login Link */}
+          {/* Back to Sign In Link */}
           {view === "forgot" && (
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button
