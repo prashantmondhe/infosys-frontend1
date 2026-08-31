@@ -49,9 +49,9 @@ export default function AuthPage() {
           body: JSON.stringify({ email }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Reset request failed");
+        if (!res.ok) throw new Error(data.message || "Reset link sent");
 
-        setMessage({ type: "success", text: "Password reset instructions sent to your email." });
+        setMessage({ type: "success", text: "Password reset link sent to your email." });
       }
     } catch (err) {
       setMessage({ type: "error", text: err.message || "An error occurred" });
@@ -61,39 +61,78 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070b19] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#0d1527] border border-slate-800 rounded-2xl p-8 shadow-2xl">
+    <div style={{
+      minHeight: "100vh",
+      backgroundColor: "#070b19",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+      fontFamily: "system-ui, -apple-system, sans-serif"
+    }}>
+      <div style={{
+        width: "100%",
+        maxWidth: "420px",
+        backgroundColor: "#0d1527",
+        border: "1px solid #1e293b",
+        borderRadius: "16px",
+        padding: "32px",
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+      }}>
         
         {/* Toggle Bar */}
-        <div className="flex bg-[#070b19] p-1 rounded-xl mb-6 border border-slate-800">
+        <div style={{
+          display: "flex",
+          backgroundColor: "#070b19",
+          padding: "4px",
+          borderRadius: "12px",
+          marginBottom: "24px",
+          border: "1px solid #1e293b"
+        }}>
           <button
             type="button"
             onClick={() => { setView("login"); setMessage({ type: "", text: "" }); }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              view === "login" ? "bg-[#2563eb] text-white shadow-lg" : "text-slate-400 hover:text-white"
-            }`}
+            style={{
+              flex: 1,
+              padding: "10px",
+              fontSize: "14px",
+              fontWeight: "600",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              backgroundColor: view === "login" ? "#2563eb" : "transparent",
+              color: view === "login" ? "#ffffff" : "#94a3b8"
+            }}
           >
             Sign In
           </button>
           <button
             type="button"
             onClick={() => { setView("register"); setMessage({ type: "", text: "" }); }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              view === "register" ? "bg-[#2563eb] text-white shadow-lg" : "text-slate-400 hover:text-white"
-            }`}
+            style={{
+              flex: 1,
+              padding: "10px",
+              fontSize: "14px",
+              fontWeight: "600",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              backgroundColor: view === "register" ? "#2563eb" : "transparent",
+              color: view === "register" ? "#ffffff" : "#94a3b8"
+            }}
           >
             Register
           </button>
         </div>
 
-        {/* Header Title */}
-        <h2 className="text-2xl font-bold text-center text-white mb-2">
+        {/* Header */}
+        <h2 style={{ fontSize: "24px", fontWeight: "bold", textAlign: "center", color: "#ffffff", margin: "0 0 8px 0" }}>
           {view === "login" && "Welcome Back"}
           {view === "register" && "Create Account"}
           {view === "forgot" && "Reset Password"}
         </h2>
         
-        <p className="text-sm text-center text-slate-400 mb-6">
+        <p style={{ fontSize: "14px", textAlign: "center", color: "#94a3b8", margin: "0 0 24px 0" }}>
           {view === "login" && "Sign in to access your dashboard"}
           {view === "register" && "Register to get started"}
           {view === "forgot" && "Enter your email to receive a reset link"}
@@ -101,77 +140,112 @@ export default function AuthPage() {
 
         {/* Message Alert */}
         {message.text && (
-          <div
-            className={`mb-4 p-3 rounded-xl text-sm ${
-              message.type === "success"
-                ? "bg-green-950/50 border border-green-700 text-green-300"
-                : "bg-red-950/50 border border-red-700 text-red-300"
-            }`}
-          >
+          <div style={{
+            marginBottom: "16px",
+            padding: "12px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            backgroundColor: message.type === "success" ? "#064e3b" : "#7f1d1d",
+            color: message.type === "success" ? "#6ee7b7" : "#fca5a5",
+            border: `1px solid ${message.type === "success" ? "#059669" : "#dc2626"}`
+          }}>
             {message.text}
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {view === "register" && (
-            <div>
-              <input
-                type="text"
-                required
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 bg-[#070b19] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-          )}
-
-          <div>
             <input
-              type="email"
+              type="text"
               required
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-[#070b19] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                backgroundColor: "#070b19",
+                border: "1px solid #1e293b",
+                borderRadius: "10px",
+                color: "#ffffff",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                outline: "none"
+              }}
             />
-          </div>
-
-          {view !== "forgot" && (
-            <div>
-              <input
-                type="password"
-                required
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#070b19] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-              />
-            </div>
           )}
 
-          {/* Role Selection Dropdown (Only Employee & Admin) */}
+          <input
+            type="email"
+            required
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              backgroundColor: "#070b19",
+              border: "1px solid #1e293b",
+              borderRadius: "10px",
+              color: "#ffffff",
+              fontSize: "14px",
+              boxSizing: "border-box",
+              outline: "none"
+            }}
+          />
+
           {view !== "forgot" && (
-            <div>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-3 bg-[#070b19] border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 cursor-pointer"
-              >
-                <option value="Employee">Employee</option>
-                <option value="Admin">Admin</option>
-              </select>
-            </div>
+            <input
+              type="password"
+              required
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                backgroundColor: "#070b19",
+                border: "1px solid #1e293b",
+                borderRadius: "10px",
+                color: "#ffffff",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                outline: "none"
+              }}
+            />
+          )}
+
+          {/* Role Dropdown: Only Admin & Employee */}
+          {view !== "forgot" && (
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                backgroundColor: "#070b19",
+                border: "1px solid #1e293b",
+                borderRadius: "10px",
+                color: "#ffffff",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                outline: "none",
+                cursor: "pointer"
+              }}
+            >
+              <option value="Employee" style={{ backgroundColor: "#0d1527", color: "#ffffff" }}>Employee</option>
+              <option value="Admin" style={{ backgroundColor: "#0d1527", color: "#ffffff" }}>Admin</option>
+            </select>
           )}
 
           {/* Forgot Password Link */}
           {view === "login" && (
-            <div className="flex justify-end">
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button
                 type="button"
                 onClick={() => { setView("forgot"); setMessage({ type: "", text: "" }); }}
-                className="text-xs text-blue-400 hover:underline"
+                style={{ background: "none", border: "none", color: "#60a5fa", fontSize: "12px", cursor: "pointer", padding: 0 }}
               >
                 Forgot Password?
               </button>
@@ -180,11 +254,11 @@ export default function AuthPage() {
 
           {/* Back to Login Link */}
           {view === "forgot" && (
-            <div className="flex justify-end">
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button
                 type="button"
                 onClick={() => { setView("login"); setMessage({ type: "", text: "" }); }}
-                className="text-xs text-blue-400 hover:underline"
+                style={{ background: "none", border: "none", color: "#60a5fa", fontSize: "12px", cursor: "pointer", padding: 0 }}
               >
                 Back to Sign In
               </button>
@@ -195,7 +269,19 @@ export default function AuthPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#2563eb] hover:bg-blue-600 text-white font-semibold rounded-xl shadow-lg transition duration-200 cursor-pointer disabled:opacity-50"
+            style={{
+              width: "100%",
+              padding: "12px",
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "10px",
+              fontWeight: "600",
+              fontSize: "14px",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1,
+              marginTop: "8px"
+            }}
           >
             {loading
               ? "Processing..."
